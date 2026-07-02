@@ -1,6 +1,29 @@
-def main():
-    print("Hello from auralis-bot!")
+import asyncio
+
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+
+from config import config
+from handlers import router as main_router
+
+dp = Dispatcher()
+
+
+async def main() -> None:
+    bot = Bot(
+        token=config.BOT_TOKEN,
+        default=DefaultBotProperties(
+            parse_mode=ParseMode.MARKDOWN_V2,
+            disable_notification=True,
+            link_preview_is_disabled=True,
+        ),
+    )
+
+    dp.include_routers(main_router)
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
