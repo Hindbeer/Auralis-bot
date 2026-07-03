@@ -1,0 +1,14 @@
+services:
+  # Telegram бот
+  bot:
+    build: .
+    container_name: auralis
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+    networks:
+      - auralis_network
+    restart: unless-stopped
+
+networks:
+  auralis_network:
+    driver: bridge
