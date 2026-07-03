@@ -4,5 +4,6 @@ from aiogram.fsm.state import State, StatesGroup
 class AudioEditStates(StatesGroup):
     audio = State()
     cover = State()
-    media_tags = State()
+    title = State()
+    artist = State()
     save = State()

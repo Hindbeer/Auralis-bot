@@ -53,11 +53,31 @@ async def get_track(message: Message, state: FSMContext):
     )
 
 
+@router.callback_query(AudioEditStates.audio, F.data == "audio_title")
+async def test(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.message.answer(
+        text="Отправь название трека", reply_markup=inline.menu
+    )
+    await callback_query.answer()
+
+    await state.set_state(AudioEditStates.title)
+
+
+@router.callback_query(F.data == "cancel_edit")
+async def cancel(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.message.delete()
+    await callback_query.answer()
+
+    await state.set_state(AudioEditStates.audio)
+
+
 @router.callback_query(AudioEditStates.audio, F.data == "audio_save")
 async def save_track(callback_query: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     audio_file = state_data["audio"]
     audio_filename = "audio-audio_file-auralis-bot.mp3"
+
+    await callback_query.message.answer(text="Ваш файл:")
 
     await bot.download_file(audio_file.file_path, audio_filename)
 
@@ -68,4 +88,5 @@ async def save_track(callback_query: CallbackQuery, state: FSMContext):
         os.remove(audio_filename)
 
     await state.clear()
+    await callback_query.message.delete()
     await callback_query.answer()
