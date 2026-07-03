@@ -1,14 +1,17 @@
+import os
 from textwrap import dedent
 
-from utils import AudioEditStates
-from keyboards import inline
-
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, FSInputFile, Message, ReplyKeyboardRemove
+
+from config import config
+from keyboards import inline
+from utils import AudioEditStates
 
 router = Router()
+bot = Bot(config.BOT_TOKEN)
 
 
 @router.message(CommandStart())
@@ -32,7 +35,9 @@ async def command_start(message: Message, state: FSMContext) -> None:
 
 @router.message(AudioEditStates.audio, F.audio)
 async def get_track(message: Message, state: FSMContext):
-    audio_filename = f"audio-{message.from_user.id}-auralis-bot.mp3"
+    main_message_id = message.message_id
+    audio_file = await bot.get_file(message.audio.file_id)
+    await state.update_data(main_message_id=main_message_id, audio=audio_file)
 
     await message.answer_photo(
         photo="https://i.pinimg.com/736x/bf/6d/86/bf6d86326ba33ac1c1dc168e0f6591f1.jpg",
@@ -40,9 +45,27 @@ async def get_track(message: Message, state: FSMContext):
         <b>ℹ️ Информация о треке:</b>
 
         Исполнитель: <code>test</code>
-        Название:  <code>тест</code>
+        Название:  <code>{message.audio.title}</code>
         
-        Название файла: <code>{audio_filename}</code>
+        Название файла: <code>{message.audio.file_name}</code>
         """),
         reply_markup=inline.audio,
     )
+
+
+@router.callback_query(AudioEditStates.audio, F.data == "audio_save")
+async def save_track(callback_query: CallbackQuery, state: FSMContext):
+    state_data = await state.get_data()
+    audio_file = state_data["audio"]
+    audio_filename = "audio-audio_file-auralis-bot.mp3"
+
+    await bot.download_file(audio_file.file_path, audio_filename)
+
+    reply_audio = FSInputFile(audio_filename, filename=audio_filename)
+    await callback_query.message.answer_audio(audio=reply_audio)
+
+    if os.path.exists(audio_filename):
+        os.remove(audio_filename)
+
+    await state.clear()
+    await callback_query.answer()
