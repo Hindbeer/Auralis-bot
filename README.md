@@ -5,7 +5,7 @@
 
   **Твои треки больше не будут безликими**
 
-  [![Latest Release](https://img.shields.io/github/v/release/hindbeer/Oferi?label=Latest%20Release&style=for-the-badge)](https://github.com/hindbeer/Auralis-bot/releases/latest)
+  [![Latest Release](https://img.shields.io/github/v/release/hindbeer/Auralis-bot?label=Latest%20Release&style=for-the-badge)](https://github.com/hindbeer/Auralis-bot/releases/latest)
 </div> 
 
 ⚡️⚡️⚡️ **AURALIS - РАБОТАЕТ** ([ссылка](https://t.me/auralis_kuve_bot))
