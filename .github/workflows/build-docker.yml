@@ -53,7 +53,7 @@ jobs:
             set -e
 
             cd ${{ secrets.PROJECT_PATH }}
-            trap 'docker compose ps; docker compose logs --tail=100 auralis-bot' ERR
+            trap 'docker compose ps; docker compose logs --tail=100 bot' ERR
 
             git fetch origin main
             git reset --hard origin/main
