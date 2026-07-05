@@ -31,10 +31,10 @@ jobs:
         with:
           push: true
           context: .
-          file: ./backend/Dockerfile
+          file: .
           tags: |
-            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/rzht-platform-backend:latest
-            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/rzht-platform-backend:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:latest
+            ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:${{ github.sha }}
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
 
@@ -59,10 +59,10 @@ jobs:
             git reset --hard origin/main
 
             echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > .env
-            
+
             echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login "${{ secrets.DOCKER_REGISTRY_URL }}" -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
 
-            export AURALIS_IMAGE="${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/rzht-platform-frontend:${{ github.sha }}"
+            export AURALIS_IMAGE="${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:${{ github.sha }}"
 
             docker compose pull
             docker compose up -d --remove-orphans
