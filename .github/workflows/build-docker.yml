@@ -31,7 +31,7 @@ jobs:
         with:
           push: true
           context: .
-          file: .
+          file: ./Dockerfile
           tags: |
             ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:latest
             ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:${{ github.sha }}
