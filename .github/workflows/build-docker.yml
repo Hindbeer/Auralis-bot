@@ -53,33 +53,14 @@ jobs:
           script: |
             set -e
 
-            # 1. Переходим в родительскую директорию, чтобы иметь возможность клонировать в PROJECT_PATH
-            # Предположим, PROJECT_PATH это /home/user/auralis-bot
-            # Мы переходим на один уровень выше
-            PARENT_DIR=$(dirname "${{ secrets.PROJECT_PATH }}")
-            PROJECT_DIR="${{ secrets.PROJECT_PATH }}"
-            
-            cd "$PARENT_DIR"
-
-            # 2. Проверяем, существует ли папка и является ли она git-репозиторием
-            if [ ! -d "$PROJECT_DIR/.git" ]; then
-              echo "Project not found or not a git repo. Cloning..."
-              # Удаляем папку, если она есть, но не является git-репо, чтобы clone сработал
-              rm -rf "$PROJECT_DIR"
-              git clone https://github.com/${{ github.repository }}.git "$PROJECT_DIR"
-            fi
-
-            cd "$PROJECT_DIR"
+            cd ${{ secrets.PROJECT_PATH }}
             trap 'docker compose ps; docker compose logs --tail=100 bot' ERR
 
-            # 3. Обновляем код
             git fetch origin main
             git reset --hard origin/main
 
-            # 4. Создаем .env файл
             echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > .env
 
-            # 5. Docker операции
             echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login "${{ secrets.DOCKER_REGISTRY_URL }}" -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
 
             export AURALIS_IMAGE="${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_USERNAME }}/auralis-bot:${{ github.sha }}"
