@@ -2,7 +2,7 @@ services:
   # Telegram бот
   bot:
     build: .
-    container_name: auralis
+    container_name: ${AURALIS_IMAGE:-auralis-bot:local}
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
     networks:
