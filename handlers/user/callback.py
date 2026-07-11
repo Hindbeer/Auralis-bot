@@ -4,13 +4,30 @@ import music_tag
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
+from aiogram_i18n import I18nContext
 
 from config import config
 from keyboards import inline
-from utils import AudioEditStates
+from utils import AudioEditStates, LanguageCallback
 
 router = Router()
 bot = Bot(config.BOT_TOKEN)
+
+
+@router.callback_query(LanguageCallback.filter())
+async def handle_language_change(
+    query: CallbackQuery,
+    callback_data: LanguageCallback,
+    i18n: I18nContext,
+    state: FSMContext,
+):
+    await i18n.set_locale(callback_data.locale)
+
+    await query.message.answer_photo(
+        photo=FSInputFile("cat.jpg"),
+        caption=i18n.get("welcome", name=query.from_user.first_name),
+    )
+    await query.answer()
 
 
 @router.callback_query(AudioEditStates.edit, F.data == "audio_artist")
