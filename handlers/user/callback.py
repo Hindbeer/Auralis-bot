@@ -16,10 +16,7 @@ bot = Bot(config.BOT_TOKEN)
 
 @router.callback_query(LanguageCallback.filter())
 async def handle_language_change(
-    query: CallbackQuery,
-    callback_data: LanguageCallback,
-    i18n: I18nContext,
-    state: FSMContext,
+    query: CallbackQuery, callback_data: LanguageCallback, i18n: I18nContext
 ):
     await i18n.set_locale(callback_data.locale)
 
@@ -31,9 +28,11 @@ async def handle_language_change(
 
 
 @router.callback_query(AudioEditStates.edit, F.data == "audio_artist")
-async def edit_artist(callback_query: CallbackQuery, state: FSMContext) -> None:
+async def edit_artist(
+    callback_query: CallbackQuery, state: FSMContext, i18n: I18nContext
+) -> None:
     await callback_query.message.answer(
-        text="Отправь имя исполнителя", reply_markup=inline.menu
+        text=i18n("edit-artist"), reply_markup=inline.get_menu_keyboard(i18n)
     )
     await callback_query.answer()
 
@@ -41,9 +40,11 @@ async def edit_artist(callback_query: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.callback_query(AudioEditStates.edit, F.data == "audio_title")
-async def edit_title(callback_query: CallbackQuery, state: FSMContext) -> None:
+async def edit_title(
+    callback_query: CallbackQuery, state: FSMContext, i18n: I18nContext
+) -> None:
     await callback_query.message.answer(
-        text="Отправь название трека", reply_markup=inline.menu
+        text=i18n("edit-title"), reply_markup=inline.get_menu_keyboard(i18n)
     )
     await callback_query.answer()
 
@@ -51,9 +52,11 @@ async def edit_title(callback_query: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.callback_query(AudioEditStates.edit, F.data == "audio_cover")
-async def edit_cover(callback_query: CallbackQuery, state: FSMContext) -> None:
+async def edit_cover(
+    callback_query: CallbackQuery, state: FSMContext, i18n: I18nContext
+) -> None:
     await callback_query.message.answer(
-        text="Отправь обложку трека", reply_markup=inline.menu
+        text=i18n("edit-cover"), reply_markup=inline.get_menu_keyboard(i18n)
     )
     await callback_query.answer()
 
@@ -71,8 +74,6 @@ async def cancel(callback_query: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(AudioEditStates.edit, F.data == "audio_save")
 async def save_track(callback_query: CallbackQuery, state: FSMContext) -> None:
     state_data = await state.get_data()
-
-    print(state_data)
 
     track_file = music_tag.load_file(state_data["audio_filename"])
     track_file["artist"] = state_data["audio_artist"]

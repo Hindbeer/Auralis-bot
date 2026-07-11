@@ -7,25 +7,26 @@ welcome =
     <b>3)</b> artist 👤 
     
     Send me your track in a format that is convenient for you 
+
+    <b>Send /start if the bot doesn't respond to your audio file</b>
     
     For questions, please contact: @G0golMogol 
     For updates, please follow: @kuvedot 
 
-main-menu =
-    .description = 
-        <b>ℹ️ Track information:</b> 
-        
-        Artist: <code>{ $artist }</code> 
-        Title:  <code>{ $title }</code> 
-         
-        File name: <code>{ $filename }</code>
-    .bttn-cover = 🌅 Cover
-    .bttn-artist = 👤 Artist
-    .bttn-title = 📝 Title
-    .bttn-save = 💾 Save
+main-menu-description = 
+    <b>ℹ️ Track information:</b> 
+    
+    Artist: <code>{ $artist }</code> 
+    Title:  <code>{ $title }</code> 
+     
+    File name: <code>{ $filename }</code>
+    
+edit-artist = Send the artist's name
+edit-title = Send the track's title
+edit-cover = Send the track's cover
 
-edit-menu = 
-    .edit-artist = Send the artist's name
-    .edit-title = Send the track's title
-    .edit-cover = Send the track's cover
-    .bttn-cancel = ⛔️ Cancel
+bttn-cover = 🌅 Cover
+bttn-artist = 👤 Artist
+bttn-title = 📝 Title
+bttn-save = 💾 Save
+bttn-cancel = ⛔️ Cancel

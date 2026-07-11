@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from utils import LanguageCallback
 
 
-def language_keyboard() -> InlineKeyboardMarkup:
+def get_language_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     languages = [
         ("🇷🇺 Русский", "ru"),
@@ -19,6 +19,3 @@ def language_keyboard() -> InlineKeyboardMarkup:
         )
     builder.adjust(1)
     return builder.as_markup()
-
-
-lang = language_keyboard()

@@ -1,4 +1,4 @@
-from textwrap import dedent
+from typing import Any
 
 from aiogram import Bot, F, Router
 from aiogram.filters import CommandStart
@@ -15,34 +15,25 @@ bot = Bot(config.BOT_TOKEN)
 
 
 @router.message(CommandStart())
-async def command_start(message: Message, state: FSMContext, i18n: I18nContext) -> None:
+async def command_start(message: Message, state: FSMContext) -> None:
     await state.clear()
-    await message.answer(text="Chose lang", reply_markup=inline.lang)
+    await message.answer(text="Chose lang", reply_markup=inline.get_language_keyboard())
 
     await state.set_state(AudioEditStates.audio)
 
 
-def get_captions(artist: str, title: str, filename: str) -> str:
-    return dedent(f"""
-    <b>ℹ️ Информация о треке:</b>
-
-    Исполнитель: <code>{artist}</code>
-    Название:  <code>{title}</code>
-        
-    Название файла: <code>{filename}</code>""")
-
-
-async def send_edit_message(message: Message, caption: str, cover: FSInputFile) -> None:
-    await message.answer_photo(
-        photo=cover,
-        caption=caption,
-        reply_markup=inline.audio,
+def get_caption(i18n: I18nContext, state_data: dict[str, Any]) -> str:
+    return i18n.get(
+        "main-menu-description",
+        artist=state_data.get("audio_artist") or "None",
+        title=state_data.get("audio_title") or "None",
+        filename=state_data.get("audio_filename") or "None",
     )
 
 
-# @router.message(AudioEditStates.audio, F.audio)
-@router.message(F.audio)
-async def get_track(message: Message, state: FSMContext) -> None:
+# @router.message(F.audio)
+@router.message(AudioEditStates.audio, F.audio)
+async def get_track(message: Message, state: FSMContext, i18n: I18nContext) -> None:
     audio_file = await bot.get_file(message.audio.file_id)
     audio_filename = f"{audio_file.file_id}-auralis-bot.mp3"
     await bot.download_file(audio_file.file_path, audio_filename)
@@ -63,67 +54,55 @@ async def get_track(message: Message, state: FSMContext) -> None:
 
     state_data = await state.get_data()
     cover = FSInputFile(state_data["cover_filename"])
-    caption = get_captions(
-        state_data["audio_artist"],
-        state_data["audio_title"],
-        state_data["audio_filename"],
-    )
+
     await message.answer_photo(
         photo=cover,
-        caption=caption,
-        reply_markup=inline.audio,
+        caption=get_caption(i18n, state_data),
+        reply_markup=inline.get_audio_keyboard(i18n),
     )
 
     await state.set_state(AudioEditStates.edit)
 
 
 @router.message(AudioEditStates.title, F.text)
-async def edit_title(message: Message, state: FSMContext) -> None:
+async def edit_title(message: Message, state: FSMContext, i18n: I18nContext) -> None:
     audio_title = message.text
     await state.update_data(audio_title=audio_title)
 
     state_data = await state.get_data()
     cover = FSInputFile(state_data["cover_filename"])
-    caption = get_captions(
-        state_data["audio_artist"],
-        state_data["audio_title"],
-        state_data["audio_filename"],
-    )
+
     await message.answer_photo(
         photo=cover,
-        caption=caption,
-        reply_markup=inline.audio,
+        caption=get_caption(i18n, state_data),
+        reply_markup=inline.get_audio_keyboard(i18n),
     )
 
     await state.set_state(AudioEditStates.edit)
 
 
 @router.message(AudioEditStates.artist, F.text)
-async def edit_artist(message: Message, state: FSMContext) -> None:
+async def edit_artist(message: Message, state: FSMContext, i18n: I18nContext) -> None:
     audio_artist = message.text
     await state.update_data(audio_artist=audio_artist)
 
     state_data = await state.get_data()
     cover = FSInputFile(state_data["cover_filename"])
-    caption = get_captions(
-        state_data["audio_artist"],
-        state_data["audio_title"],
-        state_data["audio_filename"],
-    )
+
     await message.answer_photo(
         photo=cover,
-        caption=caption,
-        reply_markup=inline.audio,
+        caption=get_caption(i18n, state_data),
+        reply_markup=inline.get_audio_keyboard(i18n),
     )
 
     await state.set_state(AudioEditStates.edit)
 
 
 @router.message(AudioEditStates.cover, F.photo)
-async def edit_cover(message: Message, state: FSMContext) -> None:
+async def edit_cover(message: Message, state: FSMContext, i18n: I18nContext) -> None:
     state_data = await state.get_data()
     cover_file = await bot.get_file(message.photo[2].file_id)
-    print(message.photo)
+
     cover_filename = (
         f"{cover_file.file_id}-auralis-bot.jpg"
         if state_data["cover_filename"] == "none-cover.jpg"
@@ -134,15 +113,11 @@ async def edit_cover(message: Message, state: FSMContext) -> None:
 
     state_data = await state.get_data()
     cover = FSInputFile(state_data["cover_filename"])
-    caption = get_captions(
-        state_data["audio_artist"],
-        state_data["audio_title"],
-        state_data["audio_filename"],
-    )
+
     await message.answer_photo(
         photo=cover,
-        caption=caption,
-        reply_markup=inline.audio,
+        caption=get_caption(i18n, state_data),
+        reply_markup=inline.get_audio_keyboard(i18n),
     )
 
     await state.set_state(AudioEditStates.edit)

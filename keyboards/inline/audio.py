@@ -1,33 +1,31 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums import ButtonStyle
+from aiogram.types import InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram_i18n import I18nContext
 
-audio = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="🌅 Обложка",
-                style=ButtonStyle.PRIMARY,
-                callback_data="audio_cover",
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="👤 Исполнитель",
-                style=ButtonStyle.PRIMARY,
-                callback_data="audio_artist",
-            ),
-            InlineKeyboardButton(
-                text="📝 Название",
-                style=ButtonStyle.PRIMARY,
-                callback_data="audio_title",
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text="💾 Сохранить",
-                style=ButtonStyle.SUCCESS,
-                callback_data="audio_save",
-            )
-        ],
-    ]
-)
+
+def get_audio_keyboard(i18n: I18nContext) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.button(
+        text=i18n("bttn-cover"),
+        callback_data="audio_cover",
+        style=ButtonStyle.PRIMARY,
+    )
+    builder.button(
+        text=i18n("bttn-artist"),
+        callback_data="audio_artist",
+        style=ButtonStyle.PRIMARY,
+    )
+    builder.button(
+        text=i18n("bttn-title"),
+        callback_data="audio_title",
+        style=ButtonStyle.PRIMARY,
+    )
+    builder.button(
+        text=i18n("bttn-save"),
+        callback_data="audio_save",
+        style=ButtonStyle.SUCCESS,
+    )
+    builder.adjust(1, 2, 1)
+    return builder.as_markup()
