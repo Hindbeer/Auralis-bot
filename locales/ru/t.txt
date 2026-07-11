@@ -1,0 +1,79 @@
+У меня есть код
+
+```main.py
+async def main() -> None:
+    bot = Bot(
+        token=config.BOT_TOKEN,
+        default=DefaultBotProperties(
+            parse_mode=ParseMode.HTML,
+            disable_notification=True,
+            link_preview_is_disabled=True,
+        ),
+    )
+
+    dp = Dispatcher()
+
+    i18n = I18nMiddleware(
+        core=FluentRuntimeCore(
+            path="locales/{locale}",
+            default_locale="en",
+        ),
+        default_locale="en",
+    )
+
+    i18n.setup(dp)
+
+    dp.include_routers(main_router)
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+```message.py
+@router.message(CommandStart())
+async def command_start(message: Message, state: FSMContext, i18n: I18nContext) -> None:
+    await state.clear()
+
+    await message.answer_photo(
+        photo=FSInputFile("cat.jpg"),
+        caption=i18n.get("welcome", name=message.from_user.first_name),
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    await state.set_state(AudioEditStates.audio)
+```
+
+```locales/ru/main.ftl
+welcome = 
+    Добро пожаловать, <b>{ $name }</b>! 
+    
+    Я могу поменять в твоем треке: 
+    <b>1)</b> обложку 🌅 
+    <b>2)</b> название 📝 
+    <b>3)</b> исполнителя 👤 
+    
+    Пришли мне свой трек, в удобном  для этого вам вормате формате 
+    
+    По вопросам писать: @G0golMogol 
+    Отслеживание обновлений: @kuvedot
+```
+
+```locales/en/main.ftl
+welcome = 
+    Welcome, <b>{ $name }</b>! 
+    
+    I can change the following in your track: 
+    <b>1)</b> cover 🌅 
+    <b>2)</b> title 📝 
+    <b>3)</b> artist 👤 
+    
+    Send me your track in a format that is convenient for you 
+    
+    For questions, please contact: @G0golMogol 
+    For updates, please follow: @kuvedot 
+```
+
+но язык все еще остается английским
