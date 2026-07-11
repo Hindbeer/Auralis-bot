@@ -60,7 +60,10 @@ async def save_track(callback_query: CallbackQuery, state: FSMContext) -> None:
     track_file = music_tag.load_file(state_data["audio_filename"])
     track_file["artist"] = state_data["audio_artist"]
     track_file["tracktitle"] = state_data["audio_title"]
-    # track_file["artwork"] = state_data["cover_filename"]
+
+    with open(state_data["cover_filename"], "rb") as cover:
+        track_file["artwork"] = cover.read()
+
     track_file.save()
 
     reply_audio = FSInputFile(

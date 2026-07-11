@@ -132,7 +132,8 @@ async def edit_artist(message: Message, state: FSMContext) -> None:
 @router.message(AudioEditStates.cover, F.photo)
 async def edit_cover(message: Message, state: FSMContext) -> None:
     state_data = await state.get_data()
-    cover_file = await bot.get_file(message.photo[-1].file_id)
+    cover_file = await bot.get_file(message.photo[2].file_id)
+    print(message.photo)
     cover_filename = (
         f"{cover_file.file_id}-auralis-bot.jpg"
         if state_data["cover_filename"] == "none-cover.jpg"
