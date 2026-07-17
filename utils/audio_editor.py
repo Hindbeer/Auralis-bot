@@ -1,7 +1,7 @@
 import music_tag
 
 
-class AudioEditer:
+class AudioEditor:
     def __init__(self, file: str):
         self.__file = music_tag.load_file(file)
 

@@ -5,10 +5,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram_i18n import I18nContext
 
-# from mutagen.id3 import APIC, ID3, TIT2, TPE1
 from config import config
 from keyboards import inline
-from utils import AudioEditer, AudioEditStates, LanguageCallback, converte_to_mp3
+from utils import AudioEditor, AudioEditStates, LanguageCallback, convert_to_mp3
 
 router = Router()
 bot = Bot(config.BOT_TOKEN)
@@ -80,9 +79,9 @@ async def save_track(
     state_data = await state.get_data()
 
     try:
-        converte_to_mp3(state_data["audio_filename"])
+        convert_to_mp3(state_data["audio_filename"])
 
-        audio_editer = AudioEditer(state_data["audio_filename"])
+        audio_editer = AudioEditor(state_data["audio_filename"])
         audio_editer.edit_artist(state_data["audio_artist"])
         audio_editer.edit_title(state_data["audio_title"])
         audio_editer.edit_cover(state_data["cover_filename"])
@@ -94,15 +93,17 @@ async def save_track(
         reply_cover = FSInputFile(
             state_data["cover_filename"], filename=state_data["cover_filename"]
         )
+
         await callback_query.message.answer_audio(
             audio=reply_audio,
             thumbnail=reply_cover,
         )
     except Exception:
-        await callback_query.message.answer(i18n.get())
+        await callback_query.message.answer(i18n.get("error"))
     finally:
         await wait_message.delete()
 
+    # Удаляем отредактируемые файлы
     if os.path.exists(state_data["audio_filename"]):
         os.remove(state_data["audio_filename"])
     if state_data["cover_filename"] != "none-cover.jpg":
