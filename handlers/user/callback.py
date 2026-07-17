@@ -4,12 +4,11 @@ from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram_i18n import I18nContext
-from mutagen.id3 import APIC, ID3, TIT2, TPE1
-from pydub import AudioSegment
 
+# from mutagen.id3 import APIC, ID3, TIT2, TPE1
 from config import config
 from keyboards import inline
-from utils import AudioEditStates, LanguageCallback
+from utils import AudioEditStates, LanguageCallback, converte_to_mp3, edit_tags
 
 router = Router()
 bot = Bot(config.BOT_TOKEN)
@@ -73,41 +72,36 @@ async def cancel(callback_query: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.callback_query(AudioEditStates.edit, F.data == "audio_save")
-async def save_track(callback_query: CallbackQuery, state: FSMContext) -> None:
+async def save_track(
+    callback_query: CallbackQuery, state: FSMContext, i18n: I18nContext
+) -> None:
+    wait_message = await callback_query.message.answer("⏳")
+
     state_data = await state.get_data()
 
-    # Конвертируем исходный файл в мп3
-    audio = AudioSegment.from_file(state_data["audio_filename"])
-    audio.export(state_data["audio_filename"], format="mp3", bitrate="320k")
+    try:
+        converte_to_mp3(state_data["audio_filename"])
 
-    # Редактируем теги
-    track_tags = ID3(state_data["audio_filename"])
-    track_tags["TIT2"] = TIT2(encoding=3, text=[state_data["audio_title"]])
-    track_tags["TPE1"] = TPE1(encoding=3, text=[state_data["audio_artist"]])
-
-    with open(state_data["cover_filename"], "rb") as cover:
-        track_tags.add(
-            APIC(
-                encoding=3,
-                mime="image/jpeg",
-                type=3,
-                desc="Cover",
-                data=cover.read(),
-            )
+        edit_tags(
+            state_data["audio_filename"],
+            state_data["audio_title"],
+            state_data["audio_artist"],
         )
 
-    track_tags.save()
-
-    reply_audio = FSInputFile(
-        state_data["audio_filename"], filename=state_data["audio_filename"]
-    )
-    reply_cover = FSInputFile(
-        state_data["cover_filename"], filename=state_data["cover_filename"]
-    )
-    await callback_query.message.answer_audio(
-        audio=reply_audio,
-        thumbnail=reply_cover,
-    )
+        reply_audio = FSInputFile(
+            state_data["audio_filename"], filename=state_data["audio_filename"]
+        )
+        reply_cover = FSInputFile(
+            state_data["cover_filename"], filename=state_data["cover_filename"]
+        )
+        await callback_query.message.answer_audio(
+            audio=reply_audio,
+            thumbnail=reply_cover,
+        )
+    except Exception:
+        await callback_query.message.answer(i18n.get("error"))
+    finally:
+        await wait_message.delete()
 
     if os.path.exists(state_data["audio_filename"]):
         os.remove(state_data["audio_filename"])

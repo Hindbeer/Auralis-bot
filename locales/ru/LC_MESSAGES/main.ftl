@@ -21,6 +21,9 @@ main-menu-description =
      
     Название файла: <code>{ $filename }</code>
 
+error = 
+    ❗️Произошла ошибка, попробуйте еще раз.
+
 edit-artist = Отправь имя исполнителя
 edit-title = Отправь название трека
 edit-cover = Отправь обложку трека

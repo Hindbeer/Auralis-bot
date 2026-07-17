@@ -20,6 +20,9 @@ main-menu-description =
     Title:  <code>{ $title }</code> 
      
     File name: <code>{ $filename }</code>
+
+error =
+    ❗️An error has occurred, please try again.
     
 edit-artist = Send the artist's name
 edit-title = Send the track's title
