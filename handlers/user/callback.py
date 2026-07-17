@@ -1,10 +1,11 @@
 import os
 
-import music_tag
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram_i18n import I18nContext
+from mutagen.id3 import APIC, ID3, TIT2, TPE1
+from pydub import AudioSegment
 
 from config import config
 from keyboards import inline
@@ -75,14 +76,27 @@ async def cancel(callback_query: CallbackQuery, state: FSMContext) -> None:
 async def save_track(callback_query: CallbackQuery, state: FSMContext) -> None:
     state_data = await state.get_data()
 
-    track_file = music_tag.load_file(state_data["audio_filename"])
-    track_file["artist"] = state_data["audio_artist"]
-    track_file["tracktitle"] = state_data["audio_title"]
+    # Конвертируем исходный файл в мп3
+    audio = AudioSegment.from_file(state_data["audio_filename"])
+    audio.export(state_data["audio_filename"], format="mp3", bitrate="320k")
+
+    # Редактируем теги
+    track_tags = ID3(state_data["audio_filename"])
+    track_tags["TIT2"] = TIT2(encoding=3, text=[state_data["audio_title"]])
+    track_tags["TPE1"] = TPE1(encoding=3, text=[state_data["audio_artist"]])
 
     with open(state_data["cover_filename"], "rb") as cover:
-        track_file["artwork"] = cover.read()
+        track_tags.add(
+            APIC(
+                encoding=3,
+                mime="image/jpeg",
+                type=3,
+                desc="Cover",
+                data=cover.read(),
+            )
+        )
 
-    track_file.save()
+    track_tags.save()
 
     reply_audio = FSInputFile(
         state_data["audio_filename"], filename=state_data["audio_filename"]
