@@ -8,7 +8,7 @@ from aiogram_i18n import I18nContext
 # from mutagen.id3 import APIC, ID3, TIT2, TPE1
 from config import config
 from keyboards import inline
-from utils import AudioEditStates, LanguageCallback, converte_to_mp3, edit_tags
+from utils import AudioEditer, AudioEditStates, LanguageCallback, converte_to_mp3
 
 router = Router()
 bot = Bot(config.BOT_TOKEN)
@@ -82,11 +82,11 @@ async def save_track(
     try:
         converte_to_mp3(state_data["audio_filename"])
 
-        edit_tags(
-            state_data["audio_filename"],
-            state_data["audio_title"],
-            state_data["audio_artist"],
-        )
+        audio_editer = AudioEditer(state_data["audio_filename"])
+        audio_editer.edit_artist(state_data["audio_artist"])
+        audio_editer.edit_title(state_data["audio_title"])
+        audio_editer.edit_cover(state_data["cover_filename"])
+        audio_editer.save_file()
 
         reply_audio = FSInputFile(
             state_data["audio_filename"], filename=state_data["audio_filename"]
@@ -99,7 +99,7 @@ async def save_track(
             thumbnail=reply_cover,
         )
     except Exception:
-        await callback_query.message.answer(i18n.get("error"))
+        await callback_query.message.answer(i18n.get())
     finally:
         await wait_message.delete()
 
